@@ -1,0 +1,10 @@
+env/influxdb.env
+data/grafana/grafana.ini
+data/grafana/data/*
+data/influxdb/*
+data/prometheus/prometheus.yml
+data/prometheus/config/*
+data/prometheus/data/*
+data/varken/varken.ini
+data/varken/logs/*
+data/varken/GeoLite2-City.mmdb

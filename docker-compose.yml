@@ -1,0 +1,66 @@
+version: '3.2'
+
+services:
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: monitoring_prometheus
+    ports:
+      - 9090:9090
+    volumes:
+      - ./data/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+      - ./data/prometheus/config:/etc/prometheus/
+      - ./data/prometheus/data:/prometheus
+    restart: unless-stopped
+    
+  grafana:
+    image: grafana/grafana:latest
+    container_name: monitoring_grafana
+    ports:
+      - 3000:3000
+    volumes:
+      - ./data/grafana/data:/var/lib/grafana
+      - ./data/grafana/grafana.ini:/etc/grafana/grafana.ini
+    environment:
+      - GF_INSTALL_PLUGINS=grafana-worldmap-panel
+    restart: unless-stopped
+
+  influxdb:
+    container_name: monitoring_influxdb
+    image: influxdb:1.8.6
+    ports:
+      - 8086:8086
+    volumes:
+      - ./data/influxdb:/var/lib/influxdb
+    env_file: ./env/influxdb.env
+    restart: unless-stopped
+
+  varken:
+    container_name: monitoring_varken
+    image: boerderij/varken
+    volumes:
+      - ./data/varken:/config
+    depends_on:
+      - influxdb
+    restart: unless-stopped
+
+#  alertmanager:
+#    image: prom/alertmanager:latest
+#    ports:
+#      - 9093:9093
+#    volumes:
+#      - ./data/alertmanager/:/etc/alertmanager/
+#    command:
+#      - '-config.file=/etc/alertmanager/config.yml'
+#      - '-storage.path=/alertmanager'
+#    restart: unless-stopped
+
+  cadvisor:
+    image: gcr.io/cadvisor/cadvisor:latest
+    container_name: monitoring_cadvisor
+    ports:
+      - 8088:8080
+    volumes:
+      - /:/rootfs:ro
+      - /var/run:/var/run:rw
+      - /sys:/sys:ro
+      - /var/lib/docker/:/var/lib/docker:ro
