@@ -46,6 +46,7 @@ services:
     volumes:
       - ./data/varken:/config
     networks:
+      - frontend
       - backend
     depends_on:
       - influxdb
