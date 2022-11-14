@@ -6,6 +6,9 @@ services:
     container_name: monitoring_prometheus
     ports:
       - 9090:9090
+    networks:
+      - frontend
+      - backend
     volumes:
       - ./data/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
       - ./data/prometheus/config:/etc/prometheus/
@@ -17,6 +20,9 @@ services:
     container_name: monitoring_grafana
     ports:
       - 3000:3000
+    networks:
+      - frontend
+      - backend
     volumes:
       - ./data/grafana/data:/var/lib/grafana
       - ./data/grafana/grafana.ini:/etc/grafana/grafana.ini
@@ -27,8 +33,8 @@ services:
   influxdb:
     container_name: monitoring_influxdb
     image: influxdb:1.8.6
-    ports:
-      - 8086:8086
+    networks:
+      - backend
     volumes:
       - ./data/influxdb:/var/lib/influxdb
     env_file: ./env/influxdb.env
@@ -39,6 +45,8 @@ services:
     image: boerderij/varken
     volumes:
       - ./data/varken:/config
+    networks:
+      - backend
     depends_on:
       - influxdb
     restart: unless-stopped
@@ -57,10 +65,16 @@ services:
   cadvisor:
     image: gcr.io/cadvisor/cadvisor:latest
     container_name: monitoring_cadvisor
-    ports:
-      - 8088:8080
+    networks:
+      - backend
     volumes:
       - /:/rootfs:ro
       - /var/run:/var/run:rw
       - /sys:/sys:ro
       - /var/lib/docker/:/var/lib/docker:ro
+
+networks:
+  backend:
+    internal: true
+  frontend:
+    driver: bridge
